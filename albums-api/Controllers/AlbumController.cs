@@ -10,6 +10,10 @@ namespace albums_api.Controllers
 {
     [Route("albums")]
     [ApiController]
+    /// <summary>
+    /// Controller for managing albums
+    /// It is responsible for handling album-related API requests such as retrieving album lists and details.
+    /// </summary>
     public class AlbumController : ControllerBase
     {
         // GET: api/album

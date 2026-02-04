@@ -6,6 +6,11 @@ interface AlbumSalesData {
   year: number;
 }
 
+/**
+ * Creates a bar chart visualizing album sales over months.
+ * @param containerId - The ID of the HTML container where the chart will be rendered.
+ * @param dataUrl - The URL to fetch the album sales data from (expects JSON format).
+ */
 export async function createAlbumSalesChart(
   containerId: string,
   dataUrl: string
