@@ -14,7 +14,16 @@
     
     <div class="album-info">
       <h3 class="album-title">{{ album.title }}</h3>
-      <p class="album-artist">{{ album.artist }}</p>
+      <p class="album-artist">{{ album.artist.name }}</p>
+      <div class="album-details">
+        <p class="album-year">{{ album.year }}</p>
+        <p class="artist-location" v-if="album.artist.birthPlace">
+          📍 {{ album.artist.birthPlace }}
+        </p>
+        <p class="artist-birthdate" v-if="album.artist.birthdate">
+          🎂 {{ formatDate(album.artist.birthdate) }}
+        </p>
+      </div>
       <div class="album-price">
         <span class="price">${{ album.price.toFixed(2) }}</span>
       </div>
@@ -39,6 +48,11 @@ defineProps<Props>()
 const handleImageError = (event: Event): void => {
   const target = event.target as HTMLImageElement
   target.src = 'https://via.placeholder.com/300x300/667eea/white?text=Album+Cover'
+}
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 </script>
 
@@ -125,7 +139,29 @@ const handleImageError = (event: Event): void => {
 .album-artist {
   color: #666;
   font-size: 1rem;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
+  font-weight: 500;
+}
+
+.album-details {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.album-year {
+  color: #667eea;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.artist-location,
+.artist-birthdate {
+  color: #777;
+  margin: 0.25rem 0;
+  font-size: 0.8rem;
 }
 
 .album-price {
