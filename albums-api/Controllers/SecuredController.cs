@@ -47,12 +47,26 @@ namespace SecureApp.Controllers
             }
 
             // Prevent path traversal by validating against base directory
-            string fullPath = Path.GetFullPath(userInput);
+            string fullPath;
+            try
+            {
+                fullPath = Path.GetFullPath(userInput);
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is NotSupportedException || ex is PathTooLongException)
+            {
+                _logger.LogWarning(ex, "Invalid file path provided.");
+                throw new ArgumentException("The specified file path is invalid.", nameof(userInput));
+            }
             string baseDirectory = Path.GetFullPath(_configuration["AllowedFileDirectory"] ?? "./data");
 
-            if (!fullPath.StartsWith(baseDirectory, StringComparison.OrdinalIgnoreCase))
+            // Use relative path to detect traversal attempts reliably across platforms
+            string relativePath = Path.GetRelativePath(baseDirectory, fullPath);
+
+            if (relativePath.Equals("..", StringComparison.Ordinal) ||
+                relativePath.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal) ||
+                Path.IsPathRooted(relativePath))
             {
-                _logger.LogWarning("Attempted path traversal detected. User input: {UserInput}, Resolved path: {FullPath}", 
+                _logger.LogWarning("Attempted path traversal detected. User input: {UserInput}, Resolved path: {FullPath}",
                     userInput, fullPath);
                 throw new UnauthorizedAccessException("Access to the specified path is denied");
             }
@@ -132,8 +146,13 @@ namespace SecureApp.Controllers
                     _logger.LogInformation("Product not found: {ProductName}", productName);
                     throw new KeyNotFoundException($"Product '{productName}' not found");
                 }
-            }
-            catch (SqlException ex)
+        /// Alternative method using a stored procedure for fetching the product (even more secure).
+        /// </summary>
+        /// <param name="productName">The name of the product to retrieve.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the product identifier.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="productName"/> is null, empty, or consists only of white-space characters.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the database connection string is not configured or when a database error occurs.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when the specified product cannot be found.</exception>
             {
                 _logger.LogError(ex, "Database error while fetching product: {ProductName}", productName);
                 throw new InvalidOperationException("An error occurred while accessing the database", ex);
