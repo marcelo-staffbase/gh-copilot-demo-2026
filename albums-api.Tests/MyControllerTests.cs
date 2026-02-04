@@ -28,7 +28,7 @@ namespace UnsecureApp.Tests.Controllers
             _mockFileService.AddFile(testFilePath, expectedContent);
 
             // Act
-            string result = _controller.ReadFile(testFilePath);
+            string? result = _controller.ReadFile(testFilePath);
 
             // Assert
             Assert.NotNull(result);
@@ -53,7 +53,7 @@ namespace UnsecureApp.Tests.Controllers
             _mockFileService.AddFile(testFilePath, string.Empty);
 
             // Act
-            string result = _controller.ReadFile(testFilePath);
+            string? result = _controller.ReadFile(testFilePath);
 
             // Assert
             Assert.Null(result);
@@ -68,7 +68,7 @@ namespace UnsecureApp.Tests.Controllers
             _mockFileService.AddFile(testFilePath, largeContent);
 
             // Act
-            string result = _controller.ReadFile(testFilePath);
+            string? result = _controller.ReadFile(testFilePath);
 
             // Assert
             Assert.NotNull(result);
@@ -104,7 +104,7 @@ namespace UnsecureApp.Tests.Controllers
             _mockFileService.AddFile(testFilePath, specialContent);
 
             // Act
-            string result = _controller.ReadFile(testFilePath);
+            string? result = _controller.ReadFile(testFilePath);
 
             // Assert
             Assert.NotNull(result);
@@ -120,7 +120,7 @@ namespace UnsecureApp.Tests.Controllers
             _mockFileService.AddFile(testFilePath, unicodeContent);
 
             // Act
-            string result = _controller.ReadFile(testFilePath);
+            string? result = _controller.ReadFile(testFilePath);
 
             // Assert
             Assert.NotNull(result);

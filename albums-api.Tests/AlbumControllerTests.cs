@@ -25,17 +25,16 @@ namespace albums_api.Tests
         private void ResetAlbumData()
         {
             // Clear all albums and reset to initial state
-            // We'll need to add a Reset method to the Album model
             typeof(Album).GetField("_albums", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?
                 .SetValue(null, new List<Album>
                 {
-                    new Album(1, "You, Me and an App Id", "Daprize", 2023, 10.99, "https://aka.ms/albums-daprlogo"),
-                    new Album(2, "Seven Revision Army", "The Blue-Green Stripes", 2022, 13.99, "https://aka.ms/albums-containerappslogo"),
-                    new Album(3, "Scale It Up", "KEDA Club", 2021, 13.99, "https://aka.ms/albums-kedalogo"),
-                    new Album(4, "Lost in Translation", "MegaDNS", 2020, 12.99, "https://aka.ms/albums-envoylogo"),
-                    new Album(5, "Lock Down Your Love", "V is for VNET", 2019, 12.99, "https://aka.ms/albums-vnetlogo"),
-                    new Album(6, "Sweet Container O' Mine", "Guns N Probeses", 2018, 14.99, "https://aka.ms/albums-containerappslogo"),
-                    new Album(7, "The CI/CD Experience", "Pipeline Pilots", 2024, 15.99, "https://aka.ms/albums-azurepipelineslogo")
+                    new Album(1, "You, Me and an App Id", Artist.GetById(1)!, 2023, 10.99, "https://aka.ms/albums-daprlogo"),
+                    new Album(2, "Seven Revision Army", Artist.GetById(2)!, 2022, 13.99, "https://aka.ms/albums-containerappslogo"),
+                    new Album(3, "Scale It Up", Artist.GetById(3)!, 2021, 13.99, "https://aka.ms/albums-kedalogo"),
+                    new Album(4, "Lost in Translation", Artist.GetById(4)!, 2020, 12.99, "https://aka.ms/albums-envoylogo"),
+                    new Album(5, "Lock Down Your Love", Artist.GetById(5)!, 2019, 12.99, "https://aka.ms/albums-vnetlogo"),
+                    new Album(6, "Sweet Container O' Mine", Artist.GetById(6)!, 2018, 14.99, "https://aka.ms/albums-containerappslogo"),
+                    new Album(7, "The CI/CD Experience", Artist.GetById(7)!, 2024, 15.99, "https://aka.ms/albums-azurepipelineslogo")
                 });
 
             typeof(Album).GetField("_nextId", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?
@@ -78,7 +77,7 @@ namespace albums_api.Tests
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var albums = Assert.IsAssignableFrom<List<Album>>(okResult.Value);
-            Assert.Equal("Daprize", albums[0].Artist);
+            Assert.Equal("Daprize", albums[0].Artist.Name);
         }
 
         [Fact]
@@ -157,7 +156,7 @@ namespace albums_api.Tests
             _controller.Post(new AlbumCreateDto
             {
                 Title = "Test Album",
-                Artist = "Test Artist",
+                ArtistId = 1,
                 Year = 2023,
                 Price = 9.99,
                 Image_url = "https://example.com/image.jpg"
@@ -206,7 +205,7 @@ namespace albums_api.Tests
             var newAlbumDto = new AlbumCreateDto
             {
                 Title = "New Test Album",
-                Artist = "Test Artist",
+                ArtistId = 1,
                 Year = 2025,
                 Price = 12.99,
                 Image_url = "https://example.com/test.jpg"
@@ -219,7 +218,7 @@ namespace albums_api.Tests
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
             var album = Assert.IsType<Album>(createdResult.Value);
             Assert.Equal("New Test Album", album.Title);
-            Assert.Equal("Test Artist", album.Artist);
+            Assert.Equal("Daprize", album.Artist.Name);
             Assert.Equal(2025, album.Year);
             Assert.Equal(12.99, album.Price);
         }
@@ -242,7 +241,7 @@ namespace albums_api.Tests
             var newAlbumDto = new AlbumCreateDto
             {
                 Title = "",
-                Artist = "Test Artist",
+                ArtistId = 1,
                 Year = 2025,
                 Price = 12.99,
                 Image_url = "https://example.com/test.jpg"
@@ -253,7 +252,7 @@ namespace albums_api.Tests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Title, Artist, and Image URL are required", badRequestResult.Value);
+            Assert.Equal("Title and Image URL are required", badRequestResult.Value);
         }
 
         [Fact]
@@ -263,7 +262,7 @@ namespace albums_api.Tests
             var newAlbumDto = new AlbumCreateDto
             {
                 Title = "Test Album",
-                Artist = "Test Artist",
+                ArtistId = 1,
                 Year = 1800,
                 Price = 12.99,
                 Image_url = "https://example.com/test.jpg"
@@ -284,7 +283,7 @@ namespace albums_api.Tests
             var newAlbumDto = new AlbumCreateDto
             {
                 Title = "Test Album",
-                Artist = "Test Artist",
+                ArtistId = 1,
                 Year = 2025,
                 Price = -5.99,
                 Image_url = "https://example.com/test.jpg"
@@ -298,6 +297,27 @@ namespace albums_api.Tests
             Assert.Equal("Price must be non-negative", badRequestResult.Value);
         }
 
+        [Fact]
+        public void Post_WithInvalidArtistId_ReturnsBadRequest()
+        {
+            // Arrange
+            var newAlbumDto = new AlbumCreateDto
+            {
+                Title = "Test Album",
+                ArtistId = 999,
+                Year = 2025,
+                Price = 12.99,
+                Image_url = "https://example.com/test.jpg"
+            };
+
+            // Act
+            var result = _controller.Post(newAlbumDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Contains("Artist with ID 999 not found", badRequestResult.Value?.ToString());
+        }
+
         #endregion
 
         #region PUT (Update) Tests
@@ -309,7 +329,7 @@ namespace albums_api.Tests
             var updateDto = new AlbumUpdateDto
             {
                 Title = "Updated Title",
-                Artist = "Updated Artist",
+                ArtistId = 2,
                 Year = 2023,
                 Price = 19.99,
                 Image_url = "https://example.com/updated.jpg"
@@ -323,7 +343,7 @@ namespace albums_api.Tests
             var album = Assert.IsType<Album>(okResult.Value);
             Assert.Equal(1, album.Id);
             Assert.Equal("Updated Title", album.Title);
-            Assert.Equal("Updated Artist", album.Artist);
+            Assert.Equal("The Blue-Green Stripes", album.Artist.Name);
             Assert.Equal(19.99, album.Price);
         }
 
@@ -334,7 +354,7 @@ namespace albums_api.Tests
             var updateDto = new AlbumUpdateDto
             {
                 Title = "Updated Title",
-                Artist = "Updated Artist",
+                ArtistId = 1,
                 Year = 2023,
                 Price = 19.99,
                 Image_url = "https://example.com/updated.jpg"
@@ -359,13 +379,13 @@ namespace albums_api.Tests
         }
 
         [Fact]
-        public void Put_WithEmptyArtist_ReturnsBadRequest()
+        public void Put_WithInvalidArtistId_ReturnsBadRequest()
         {
             // Arrange
             var updateDto = new AlbumUpdateDto
             {
                 Title = "Updated Title",
-                Artist = "",
+                ArtistId = 0,
                 Year = 2023,
                 Price = 19.99,
                 Image_url = "https://example.com/updated.jpg"
@@ -376,7 +396,7 @@ namespace albums_api.Tests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Title, Artist, and Image URL are required", badRequestResult.Value);
+            Assert.Equal("Valid Artist ID is required", badRequestResult.Value);
         }
 
         [Fact]
@@ -386,7 +406,7 @@ namespace albums_api.Tests
             var updateDto = new AlbumUpdateDto
             {
                 Title = "Updated Title",
-                Artist = "Updated Artist",
+                ArtistId = 1,
                 Year = 2200,
                 Price = 19.99,
                 Image_url = "https://example.com/updated.jpg"
@@ -452,7 +472,7 @@ namespace albums_api.Tests
             var createDto = new AlbumCreateDto
             {
                 Title = "Integration Test Album",
-                Artist = "Integration Artist",
+                ArtistId = 1,
                 Year = 2026,
                 Price = 14.99,
                 Image_url = "https://example.com/integration.jpg"
@@ -472,7 +492,7 @@ namespace albums_api.Tests
             var updateDto = new AlbumUpdateDto
             {
                 Title = "Updated Integration Album",
-                Artist = "Updated Artist",
+                ArtistId = 2,
                 Year = 2026,
                 Price = 19.99,
                 Image_url = "https://example.com/updated.jpg"
@@ -499,7 +519,7 @@ namespace albums_api.Tests
             var createDto = new AlbumCreateDto
             {
                 Title = "2026 Album",
-                Artist = "Future Artist",
+                ArtistId = 1,
                 Year = 2026,
                 Price = 20.99,
                 Image_url = "https://example.com/2026.jpg"

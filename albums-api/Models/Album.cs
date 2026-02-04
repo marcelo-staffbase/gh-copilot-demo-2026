@@ -1,18 +1,25 @@
 ﻿namespace albums_api.Models
 {
-    public record Album(int Id, string Title, string Artist, int Year, double Price, string Image_url)
+    public record Album(int Id, string Title, Artist Artist, int Year, double Price, string Image_url)
     {
-        private static List<Album> _albums = new List<Album>(){
-            new Album(1, "You, Me and an App Id", "Daprize", 2023, 10.99, "https://aka.ms/albums-daprlogo"),
-            new Album(2, "Seven Revision Army", "The Blue-Green Stripes", 2022, 13.99, "https://aka.ms/albums-containerappslogo"),
-            new Album(3, "Scale It Up", "KEDA Club", 2021, 13.99, "https://aka.ms/albums-kedalogo"),
-            new Album(4, "Lost in Translation", "MegaDNS", 2020, 12.99,"https://aka.ms/albums-envoylogo"),
-            new Album(5, "Lock Down Your Love", "V is for VNET", 2019, 12.99, "https://aka.ms/albums-vnetlogo"),
-            new Album(6, "Sweet Container O' Mine", "Guns N Probeses", 2018, 14.99, "https://aka.ms/albums-containerappslogo"),
-            new Album(7, "The CI/CD Experience", "Pipeline Pilots", 2024, 15.99, "https://aka.ms/albums-azurepipelineslogo")
-        };
+        private static List<Album> _albums = new List<Album>();
         
         private static int _nextId = 8;
+
+        static Album()
+        {
+            // Initialize albums with artists
+            _albums = new List<Album>
+            {
+                new Album(1, "You, Me and an App Id", Artist.GetById(1)!, 2023, 10.99, "https://aka.ms/albums-daprlogo"),
+                new Album(2, "Seven Revision Army", Artist.GetById(2)!, 2022, 13.99, "https://aka.ms/albums-containerappslogo"),
+                new Album(3, "Scale It Up", Artist.GetById(3)!, 2021, 13.99, "https://aka.ms/albums-kedalogo"),
+                new Album(4, "Lost in Translation", Artist.GetById(4)!, 2020, 12.99, "https://aka.ms/albums-envoylogo"),
+                new Album(5, "Lock Down Your Love", Artist.GetById(5)!, 2019, 12.99, "https://aka.ms/albums-vnetlogo"),
+                new Album(6, "Sweet Container O' Mine", Artist.GetById(6)!, 2018, 14.99, "https://aka.ms/albums-containerappslogo"),
+                new Album(7, "The CI/CD Experience", Artist.GetById(7)!, 2024, 15.99, "https://aka.ms/albums-azurepipelineslogo")
+            };
+        }
 
         public static List<Album> GetAll()
         {
@@ -29,19 +36,31 @@
             return _albums.Where(a => a.Year == year).ToList();
         }
         
-        public static Album Create(string title, string artist, int year, double price, string imageUrl)
+        public static Album Create(string title, int artistId, int year, double price, string imageUrl)
         {
+            var artist = Artist.GetById(artistId);
+            if (artist == null)
+            {
+                throw new ArgumentException($"Artist with ID {artistId} not found", nameof(artistId));
+            }
+            
             var newAlbum = new Album(_nextId++, title, artist, year, price, imageUrl);
             _albums.Add(newAlbum);
             return newAlbum;
         }
         
-        public static Album? Update(int id, string title, string artist, int year, double price, string imageUrl)
+        public static Album? Update(int id, string title, int artistId, int year, double price, string imageUrl)
         {
             var index = _albums.FindIndex(a => a.Id == id);
             if (index == -1)
             {
                 return null;
+            }
+            
+            var artist = Artist.GetById(artistId);
+            if (artist == null)
+            {
+                throw new ArgumentException($"Artist with ID {artistId} not found", nameof(artistId));
             }
             
             var updatedAlbum = new Album(id, title, artist, year, price, imageUrl);

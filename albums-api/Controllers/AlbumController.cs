@@ -43,7 +43,7 @@ namespace albums_api.Controllers
             return sortBy.ToLower() switch
             {
                 "title" => albums.OrderBy(a => a.Title).ToList(),
-                "artist" => albums.OrderBy(a => a.Artist).ToList(),
+                "artist" => albums.OrderBy(a => a.Artist.Name).ToList(),
                 "price" => albums.OrderBy(a => a.Price).ToList(),
                 _ => albums
             };
@@ -86,10 +86,9 @@ namespace albums_api.Controllers
             }
 
             if (string.IsNullOrWhiteSpace(albumDto.Title) || 
-                string.IsNullOrWhiteSpace(albumDto.Artist) ||
                 string.IsNullOrWhiteSpace(albumDto.Image_url))
             {
-                return BadRequest("Title, Artist, and Image URL are required");
+                return BadRequest("Title and Image URL are required");
             }
 
             if (albumDto.Year < 1900 || albumDto.Year > 2100)
@@ -102,15 +101,27 @@ namespace albums_api.Controllers
                 return BadRequest("Price must be non-negative");
             }
 
-            var newAlbum = Album.Create(
-                albumDto.Title, 
-                albumDto.Artist, 
-                albumDto.Year, 
-                albumDto.Price, 
-                albumDto.Image_url
-            );
+            if (albumDto.ArtistId <= 0)
+            {
+                return BadRequest("Valid Artist ID is required");
+            }
 
-            return CreatedAtAction(nameof(Get), new { id = newAlbum.Id }, newAlbum);
+            try
+            {
+                var newAlbum = Album.Create(
+                    albumDto.Title, 
+                    albumDto.ArtistId, 
+                    albumDto.Year, 
+                    albumDto.Price, 
+                    albumDto.Image_url
+                );
+
+                return CreatedAtAction(nameof(Get), new { id = newAlbum.Id }, newAlbum);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT api/<AlbumController>/5
@@ -123,10 +134,9 @@ namespace albums_api.Controllers
             }
 
             if (string.IsNullOrWhiteSpace(albumDto.Title) || 
-                string.IsNullOrWhiteSpace(albumDto.Artist) ||
                 string.IsNullOrWhiteSpace(albumDto.Image_url))
             {
-                return BadRequest("Title, Artist, and Image URL are required");
+                return BadRequest("Title and Image URL are required");
             }
 
             if (albumDto.Year < 1900 || albumDto.Year > 2100)
@@ -139,21 +149,33 @@ namespace albums_api.Controllers
                 return BadRequest("Price must be non-negative");
             }
 
-            var updatedAlbum = Album.Update(
-                id,
-                albumDto.Title, 
-                albumDto.Artist, 
-                albumDto.Year, 
-                albumDto.Price, 
-                albumDto.Image_url
-            );
-
-            if (updatedAlbum == null)
+            if (albumDto.ArtistId <= 0)
             {
-                return NotFound();
+                return BadRequest("Valid Artist ID is required");
             }
 
-            return Ok(updatedAlbum);
+            try
+            {
+                var updatedAlbum = Album.Update(
+                    id,
+                    albumDto.Title, 
+                    albumDto.ArtistId, 
+                    albumDto.Year, 
+                    albumDto.Price, 
+                    albumDto.Image_url
+                );
+
+                if (updatedAlbum == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(updatedAlbum);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE api/<AlbumController>/5
@@ -176,7 +198,7 @@ namespace albums_api.Controllers
     public class AlbumCreateDto
     {
         public string Title { get; set; } = string.Empty;
-        public string Artist { get; set; } = string.Empty;
+        public int ArtistId { get; set; }
         public int Year { get; set; }
         public double Price { get; set; }
         public string Image_url { get; set; } = string.Empty;
@@ -185,7 +207,7 @@ namespace albums_api.Controllers
     public class AlbumUpdateDto
     {
         public string Title { get; set; } = string.Empty;
-        public string Artist { get; set; } = string.Empty;
+        public int ArtistId { get; set; }
         public int Year { get; set; }
         public double Price { get; set; }
         public string Image_url { get; set; } = string.Empty;
