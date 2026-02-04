@@ -16,7 +16,7 @@ export async function createAlbumSalesChart(
   dataUrl: string
 ): Promise<void> {
   // Load data from external JSON source
-  const data: AlbumSalesData[] = await d3.json(dataUrl);
+  const data: AlbumSalesData[] = (await d3.json(dataUrl)) || [];
 
   // Set up dimensions and margins
   const margin = { top: 20, right: 30, bottom: 40, left: 50 };
