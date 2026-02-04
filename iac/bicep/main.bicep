@@ -124,8 +124,35 @@ module albumServiceCapp 'modules/container-app.bicep' = {
   }
 }
 
+// Container Registry
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
+  name: 'acr${replace(uniqueSuffix, '-', '')}'
+  location: location
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    adminUserEnabled: true
+  }
+}
+
+// Azure OpenAI
+resource openAI 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+  name: 'openai-${uniqueSuffix}'
+  location: location
+  kind: 'OpenAI'
+  sku: {
+    name: 'S0'
+  }
+  properties: {
+    customSubDomainName: 'openai-${uniqueSuffix}'
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
 output env array=[
   'Environment name: ${containerAppsEnv.name}'
   'Storage account name: ${storageAccount.name}'
   'Storage container name: ${blobContainer.name}'
 ]
+
