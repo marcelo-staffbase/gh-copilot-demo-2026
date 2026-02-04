@@ -5,7 +5,8 @@ A modern Vue.js 3 application built with TypeScript that displays albums from th
 ## Features
 
 - 🎵 Display album collection in a beautiful grid layout
-- 🎨 Modern, responsive design with gradient background
+- � Multi-language support (English, French, German)
+- �🎨 Modern, responsive design with gradient background
 - 🖼️ Album cover images with hover effects
 - 💰 Price display for each album
 - 📱 Mobile-friendly responsive design
@@ -18,7 +19,7 @@ A modern Vue.js 3 application built with TypeScript that displays albums from th
 - Node.js (v16 or higher)
 - npm or yarn
 - TypeScript knowledge (helpful but not required)
-- The albums-api should be running on `http://localhost:3000`
+- The album-api-v2 (Node.js) or albums-api (.NET) should be running on `http://localhost:3000`
 
 ## Getting Started
 
@@ -27,16 +28,44 @@ A modern Vue.js 3 application built with TypeScript that displays albums from th
    npm install
    ```
 
-2. Start the development server:
+2. Make sure the backend API is running:
+   - For Node.js backend (album-api-v2): `npm start` in the album-api-v2 directory
+   - For .NET backend (albums-api): Start the albums-api project
+   - The backend should be accessible at `http://localhost:3000/api/album`
+
+3. Start the development server:
    ```bash
    npm run dev
    ```
 
-3. Open your browser and navigate to `http://localhost:3001`
+4. Open your browser and navigate to `http://localhost:3001`
 
 ## API Integration
 
-The app fetches album data from the albums API endpoint `/albums`. Make sure the albums-api is running before starting the Vue app.
+The app runs on port 3001 and uses a Vite proxy to communicate with the backend API:
+- Frontend URL: `http://localhost:3001`
+- Frontend calls: `/albums`
+- Vite proxy forwards to: `http://localhost:3000/api/album`
+
+### Proxy Configuration
+
+The Vite configuration (in `vite.config.ts`) includes a proxy setup:
+```typescript
+server: {
+  port: 3001,
+  proxy: {
+    '/albums': {
+      target: 'http://localhost:3000/api/album',
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/albums/, '')
+    }
+  }
+}
+```
+
+This allows the frontend to make requests to `/albums` which are automatically forwarded to the backend's `/api/album` endpoint.
+
+### API Response Format
 
 The API should return albums in the following format:
 ```json
@@ -81,9 +110,38 @@ album-viewer/
 
 - Vue 3 (Composition API with `<script setup>`)
 - TypeScript (Static type checking and better developer experience)
+- Vue I18n (Internationalization framework)
 - Vite (Build tool with TypeScript support)
 - Axios (HTTP client with TypeScript generics)
 - CSS3 (Grid, Flexbox, Animations)
+
+## Internationalization
+
+The application supports multiple languages using Vue I18n:
+
+### Supported Languages
+- **English (en)** - Default language
+- **French (fr)** - Français
+- **German (de)** - Deutsch
+
+### Language Selector
+A language selector is available in the header of the application. Changing the language updates:
+- All UI text and labels
+- Button text
+- Error messages
+- Date formatting (locale-aware)
+
+### Translation Files
+Translation files are located in `src/locales/`:
+- `en.ts` - English translations
+- `fr.ts` - French translations
+- `de.ts` - German translations
+
+### Adding New Languages
+To add a new language:
+1. Create a new translation file in `src/locales/` (e.g., `es.ts` for Spanish)
+2. Add the language to `src/locales/index.ts`
+3. Update the language selector in `App.vue`
 
 ## TypeScript Features
 

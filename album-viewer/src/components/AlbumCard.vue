@@ -30,13 +30,14 @@
     </div>
     
     <div class="album-actions">
-      <button class="btn btn-primary">Add to Cart</button>
-      <button class="btn btn-secondary">Preview</button>
+      <button class="btn btn-primary">{{ $t('albumCard.addToCart') }}</button>
+      <button class="btn btn-secondary">{{ $t('albumCard.preview') }}</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import type { Album } from '../types/album'
 
 interface Props {
@@ -45,6 +46,8 @@ interface Props {
 
 defineProps<Props>()
 
+const { locale } = useI18n()
+
 const handleImageError = (event: Event): void => {
   const target = event.target as HTMLImageElement
   target.src = 'https://via.placeholder.com/300x300/667eea/white?text=Album+Cover'
@@ -52,7 +55,13 @@ const handleImageError = (event: Event): void => {
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  const localeMap: { [key: string]: string } = {
+    'en': 'en-US',
+    'fr': 'fr-FR',
+    'de': 'de-DE'
+  }
+  const currentLocale = localeMap[locale.value] || 'en-US'
+  return date.toLocaleDateString(currentLocale, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 </script>
 

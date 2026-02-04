@@ -1,19 +1,31 @@
 <template>
   <div class="app">
     <header class="header">
-      <h1>🎵 Album Collection</h1>
-      <p>Discover amazing music albums</p>
+      <div class="header-content">
+        <div class="header-text">
+          <h1>🎵 {{ $t('header.title') }}</h1>
+          <p>{{ $t('header.subtitle') }}</p>
+        </div>
+        <div class="language-selector">
+          <label for="language">{{ $t('language.label') }}:</label>
+          <select id="language" v-model="currentLocale" @change="changeLanguage">
+            <option value="en">{{ $t('language.en') }}</option>
+            <option value="fr">{{ $t('language.fr') }}</option>
+            <option value="de">{{ $t('language.de') }}</option>
+          </select>
+        </div>
+      </div>
     </header>
 
     <main class="main">
       <div v-if="loading" class="loading">
         <div class="spinner"></div>
-        <p>Loading albums...</p>
+        <p>{{ $t('loading.message') }}</p>
       </div>
 
       <div v-else-if="error" class="error">
-        <p>{{ error }}</p>
-        <button @click="fetchAlbums" class="retry-btn">Try Again</button>
+        <p>{{ $t('error.message') }}</p>
+        <button @click="fetchAlbums" class="retry-btn">{{ $t('error.retry') }}</button>
       </div>
 
       <div v-else class="albums-grid">
@@ -29,13 +41,24 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import AlbumCard from './components/AlbumCard.vue'
 import type { Album } from './types/album'
 
+const { locale } = useI18n()
+const currentLocale = ref<string>(locale.value)
+
 const albums = ref<Album[]>([])
 const loading = ref<boolean>(true)
 const error = ref<string | null>(null)
+
+/** 
+ * Changes the application language
+ */
+const changeLanguage = (): void => {
+  locale.value = currentLocale.value
+}
 
 /** 
  * Fetches the list of albums from the API.
@@ -73,15 +96,60 @@ onMounted(() => {
   color: white;
 }
 
-.header h1 {
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-text h1 {
   font-size: 3rem;
   margin-bottom: 0.5rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.header p {
+.header-text p {
   font-size: 1.2rem;
   opacity: 0.9;
+}
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.language-selector label {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.language-selector select {
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 15px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.language-selector select:hover {
+  background: white;
+  transform: translateY(-2px);
+}
+
+.language-selector select:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
 }
 
 .main {

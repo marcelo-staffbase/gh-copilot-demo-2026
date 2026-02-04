@@ -214,6 +214,30 @@ album-api-v2/
 
 This API is designed to be a drop-in replacement for the original .NET albums-api and is fully compatible with the VueJS album-viewer frontend application.
 
+### Frontend Integration
+
+The VueJS album-viewer app is configured to run on port 3001 and uses a Vite proxy to forward requests:
+- Frontend calls: `http://localhost:3001/albums`
+- Proxy forwards to: `http://localhost:3000/api/album`
+
+To run both applications together:
+
+1. **Start the backend** (in album-api-v2 directory):
+   ```bash
+   npm start
+   ```
+
+2. **Start the frontend** (in album-viewer directory):
+   ```bash
+   npm run dev
+   ```
+
+3. **Access the application**:
+   - Frontend: http://localhost:3001
+   - Backend API: http://localhost:3000/api/album
+
+The frontend's Vite proxy configuration automatically routes `/albums` requests to the backend's `/api/album` endpoint.
+
 ## License
 
 MIT

@@ -13,8 +13,9 @@ export default defineConfig({
     port: 3001,
     proxy: {
       '/albums': {
-        target: 'http://localhost:3000',
-        changeOrigin: true
+        target: 'http://localhost:3000/api/album',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/albums/, '')
       }
     }
   }
