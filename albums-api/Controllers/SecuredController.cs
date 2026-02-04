@@ -146,13 +146,8 @@ namespace SecureApp.Controllers
                     _logger.LogInformation("Product not found: {ProductName}", productName);
                     throw new KeyNotFoundException($"Product '{productName}' not found");
                 }
-        /// Alternative method using a stored procedure for fetching the product (even more secure).
-        /// </summary>
-        /// <param name="productName">The name of the product to retrieve.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the product identifier.</returns>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="productName"/> is null, empty, or consists only of white-space characters.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when the database connection string is not configured or when a database error occurs.</exception>
-        /// <exception cref="KeyNotFoundException">Thrown when the specified product cannot be found.</exception>
+            }
+            catch (SqlException ex)
             {
                 _logger.LogError(ex, "Database error while fetching product: {ProductName}", productName);
                 throw new InvalidOperationException("An error occurred while accessing the database", ex);

@@ -63,5 +63,131 @@ namespace albums_api.Controllers
             return Ok(album);
         }
 
+        // GET: api/album/search?year=2023
+        [HttpGet("search")]
+        public IActionResult SearchByYear([FromQuery] int? year)
+        {
+            if (!year.HasValue)
+            {
+                return BadRequest("Year parameter is required");
+            }
+            
+            var albums = Album.GetByYear(year.Value);
+            return Ok(albums);
+        }
+
+        // POST api/<AlbumController>
+        [HttpPost]
+        public IActionResult Post([FromBody] AlbumCreateDto albumDto)
+        {
+            if (albumDto == null)
+            {
+                return BadRequest("Album data is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(albumDto.Title) || 
+                string.IsNullOrWhiteSpace(albumDto.Artist) ||
+                string.IsNullOrWhiteSpace(albumDto.Image_url))
+            {
+                return BadRequest("Title, Artist, and Image URL are required");
+            }
+
+            if (albumDto.Year < 1900 || albumDto.Year > 2100)
+            {
+                return BadRequest("Year must be between 1900 and 2100");
+            }
+
+            if (albumDto.Price < 0)
+            {
+                return BadRequest("Price must be non-negative");
+            }
+
+            var newAlbum = Album.Create(
+                albumDto.Title, 
+                albumDto.Artist, 
+                albumDto.Year, 
+                albumDto.Price, 
+                albumDto.Image_url
+            );
+
+            return CreatedAtAction(nameof(Get), new { id = newAlbum.Id }, newAlbum);
+        }
+
+        // PUT api/<AlbumController>/5
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] AlbumUpdateDto albumDto)
+        {
+            if (albumDto == null)
+            {
+                return BadRequest("Album data is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(albumDto.Title) || 
+                string.IsNullOrWhiteSpace(albumDto.Artist) ||
+                string.IsNullOrWhiteSpace(albumDto.Image_url))
+            {
+                return BadRequest("Title, Artist, and Image URL are required");
+            }
+
+            if (albumDto.Year < 1900 || albumDto.Year > 2100)
+            {
+                return BadRequest("Year must be between 1900 and 2100");
+            }
+
+            if (albumDto.Price < 0)
+            {
+                return BadRequest("Price must be non-negative");
+            }
+
+            var updatedAlbum = Album.Update(
+                id,
+                albumDto.Title, 
+                albumDto.Artist, 
+                albumDto.Year, 
+                albumDto.Price, 
+                albumDto.Image_url
+            );
+
+            if (updatedAlbum == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedAlbum);
+        }
+
+        // DELETE api/<AlbumController>/5
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var success = Album.Delete(id);
+            
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+
+    }
+
+    // DTOs for request validation
+    public class AlbumCreateDto
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Artist { get; set; } = string.Empty;
+        public int Year { get; set; }
+        public double Price { get; set; }
+        public string Image_url { get; set; } = string.Empty;
+    }
+
+    public class AlbumUpdateDto
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Artist { get; set; } = string.Empty;
+        public int Year { get; set; }
+        public double Price { get; set; }
+        public string Image_url { get; set; } = string.Empty;
     }
 }
