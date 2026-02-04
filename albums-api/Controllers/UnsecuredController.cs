@@ -1,11 +1,22 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using UnsecureApp.Services;
 
 namespace UnsecureApp.Controllers
 {
+    /// <summary>
+    /// WARNING: This controller contains intentional security vulnerabilities for demonstration purposes.
+    /// DO NOT USE IN PRODUCTION.
+    /// See SecuredController.cs for the secure implementation.
+    /// 
+    /// Known vulnerabilities:
+    /// 1. SQL Injection in GetProduct method
+    /// 2. Path Traversal in ReadFile method
+    /// 3. Missing input validation
+    /// 4. Poor error handling
+    /// 5. Hardcoded empty connection string
+    /// </summary>
     public class MyController
     {
         private readonly IFileService _fileService;
