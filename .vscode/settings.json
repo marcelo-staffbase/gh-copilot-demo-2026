@@ -2,5 +2,9 @@
     "github.copilot.enable": {
         "plaintext": true,
         "markdown": true
-    }
+    },
+    "terminal.integrated.env.linux": {
+        "DOCKER_HOST": "unix:///var/run/docker.sock"
+    },
+    "github.copilot.chat.mcp.enabled": false
 }

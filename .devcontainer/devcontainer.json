@@ -24,6 +24,16 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [3000,3001],
 	
+	// Mount Docker socket
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+	],
+	
+	// Set container environment variables
+	"containerEnv": {
+		"DOCKER_HOST": "unix:///var/run/docker.sock"
+	},
+	
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "dotnet restore albums-api && npm install --prefix album-viewer && dotnet dev-certs https --trust && echo 'Setup complete'",
 	// Configure tool-specific properties.
