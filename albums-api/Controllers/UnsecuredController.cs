@@ -2,26 +2,22 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using UnsecureApp.Services;
 
 namespace UnsecureApp.Controllers
 {
     public class MyController
     {
+        private readonly IFileService _fileService;
 
-        public string ReadFile(string userInput)
+        public MyController(IFileService? fileService = null)
         {
-            using (FileStream fs = File.Open(userInput, FileMode.Open))
-            {
-                byte[] b = new byte[1024];
-                UTF8Encoding temp = new UTF8Encoding(true);
+            _fileService = fileService ?? new FileService();
+        }
 
-                while (fs.Read(b, 0, b.Length) > 0)
-                {
-                    return temp.GetString(b);
-                }
-            }
-
-            return null;
+        public string? ReadFile(string userInput)
+        {
+            return _fileService.ReadFile(userInput);
         }
 
         public int GetProduct(string productName)
@@ -43,8 +39,8 @@ namespace UnsecureApp.Controllers
         {
             try
             {
-                object o = null;
-                o.ToString();
+                object? o = null;
+                o?.ToString();
             }
             catch (Exception e)
             {
